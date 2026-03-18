@@ -13,6 +13,9 @@ importers:
       "@nestjs/core":
         specifier: ^11.0.1
         version: 11.1.17(@nestjs/common@11.1.17(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.17)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      "@nestjs/mapped-types":
+        specifier: "*"
+        version: 2.1.0(@nestjs/common@11.1.17(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(class-validator@0.15.1)(reflect-metadata@0.2.2)
       "@nestjs/platform-express":
         specifier: ^11.0.1
         version: 11.1.17(@nestjs/common@11.1.17(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)
@@ -25,6 +28,9 @@ importers:
       drizzle-orm:
         specifier: ^0.45.1
         version: 0.45.1(@types/pg@8.18.0)(pg@8.20.0)
+      drizzle-zod:
+        specifier: ^0.8.3
+        version: 0.8.3(drizzle-orm@0.45.1(@types/pg@8.18.0)(pg@8.20.0))(zod@4.3.6)
       pg:
         specifier: ^8.20.0
         version: 8.20.0
@@ -1964,6 +1970,22 @@ packages:
       "@nestjs/platform-express":
         optional: true
       "@nestjs/websockets":
+        optional: true
+
+  "@nestjs/mapped-types@2.1.0":
+    resolution:
+      {
+        integrity: sha512-W+n+rM69XsFdwORF11UqJahn4J3xi4g/ZEOlJNL6KoW5ygWSmBB2p0S2BZ4FQeS/NDH72e6xIcu35SfJnE8bXw==,
+      }
+    peerDependencies:
+      "@nestjs/common": ^10.0.0 || ^11.0.0
+      class-transformer: ^0.4.0 || ^0.5.0
+      class-validator: ^0.13.0 || ^0.14.0
+      reflect-metadata: ^0.1.12 || ^0.2.0
+    peerDependenciesMeta:
+      class-transformer:
+        optional: true
+      class-validator:
         optional: true
 
   "@nestjs/platform-express@11.1.17":
@@ -3954,6 +3976,15 @@ packages:
         optional: true
       sqlite3:
         optional: true
+
+  drizzle-zod@0.8.3:
+    resolution:
+      {
+        integrity: sha512-66yVOuvGhKJnTdiqj1/Xaaz9/qzOdRJADpDa68enqS6g3t0kpNkwNYjUuaeXgZfO/UWuIM9HIhSlJ6C5ZraMww==,
+      }
+    peerDependencies:
+      drizzle-orm: ">=0.36.0"
+      zod: ^3.25.0 || ^4.0.0
 
   dunder-proto@1.0.1:
     resolution:
@@ -9427,6 +9458,13 @@ snapshots:
     optionalDependencies:
       "@nestjs/platform-express": 11.1.17(@nestjs/common@11.1.17(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)
 
+  "@nestjs/mapped-types@2.1.0(@nestjs/common@11.1.17(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(class-validator@0.15.1)(reflect-metadata@0.2.2)":
+    dependencies:
+      "@nestjs/common": 11.1.17(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      reflect-metadata: 0.2.2
+    optionalDependencies:
+      class-validator: 0.15.1
+
   "@nestjs/platform-express@11.1.17(@nestjs/common@11.1.17(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)":
     dependencies:
       "@nestjs/common": 11.1.17(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -10614,6 +10652,11 @@ snapshots:
     optionalDependencies:
       "@types/pg": 8.18.0
       pg: 8.20.0
+
+  drizzle-zod@0.8.3(drizzle-orm@0.45.1(@types/pg@8.18.0)(pg@8.20.0))(zod@4.3.6):
+    dependencies:
+      drizzle-orm: 0.45.1(@types/pg@8.18.0)(pg@8.20.0)
+      zod: 4.3.6
 
   dunder-proto@1.0.1:
     dependencies:
