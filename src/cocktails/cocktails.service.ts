@@ -8,6 +8,7 @@ import {
   UpdateCocktailDto,
   cocktails,
 } from "../db/schema/cocktails";
+import { PaginationDto } from "../pagination/pagination.schema";
 
 @Injectable()
 export class CocktailsService {
@@ -15,8 +16,21 @@ export class CocktailsService {
     return database.insert(cocktails).values(createCocktailDto).returning();
   }
 
-  findAll() {
-    return database.select().from(cocktails);
+  async findAll(query: PaginationDto) {
+    const { page, limit } = query;
+    const offset = (page - 1) * limit;
+    const data = await database
+      .select()
+      .from(cocktails)
+      .limit(limit)
+      .offset(offset);
+
+    const total = await database.$count(cocktails);
+
+    return {
+      data,
+      meta: { limit, page, total, pageCount: Math.ceil(total / limit) },
+    };
   }
 
   findOne(id: number) {
