@@ -29,6 +29,13 @@
       "when": 1773923434457,
       "tag": "0003_fix_names",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1773924961139,
+      "tag": "0004_cocktails_category_enum",
+      "breakpoints": true
     }
   ]
 }
