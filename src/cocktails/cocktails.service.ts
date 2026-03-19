@@ -33,12 +33,21 @@ export class CocktailsService {
     };
   }
 
-  findOne(id: number) {
-    return database
-      .select()
-      .from(cocktails)
-      .where(eq(cocktails.id, id))
-      .limit(1);
+  async findOne(id: number) {
+    return await database.query.cocktails.findMany({
+      with: {
+        ingredients: {
+          columns: {
+            cocktailId: false,
+            ingredientId: false,
+          },
+          with: {
+            ingredient: true,
+          },
+        },
+      },
+      where: eq(cocktails.id, id),
+    });
   }
 
   update(id: number, updateCocktailDto: UpdateCocktailDto) {
