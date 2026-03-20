@@ -3,7 +3,11 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    DATABASE_URL: z.url(),
+    DATABASE_USER: z.string(),
+    DATABASE_PASSWORD: z.string(),
+    DATABASE_HOST: z.string(),
+    DATABASE_PORT: z.number().default(5432),
+    DATABASE_NAME: z.string(),
     PORT: z.string().default("4000"),
   },
   clientPrefix: "PUBLIC_",
