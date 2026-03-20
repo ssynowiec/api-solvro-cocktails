@@ -14,6 +14,7 @@ import {
   ApiOperation,
   ApiQuery,
   ApiTags,
+  OmitType,
 } from "@nestjs/swagger";
 
 import { PaginationDto } from "../pagination/entities/pagination.dto";
@@ -34,7 +35,7 @@ export class CocktailsController {
   @ApiOperation({ summary: "Create a new cocktail with ingredients" })
   @ApiBody({
     required: false,
-    type: Cocktail,
+    type: OmitType(Cocktail, ["id"]),
     examples: {
       cocktail: {
         value: {
@@ -94,6 +95,15 @@ export class CocktailsController {
 
   @Get(":id")
   @ApiOperation({ summary: "Get a cocktail by ID" })
+  @ApiOkResponse({
+    type: Cocktail,
+    example: {
+      id: 1,
+      name: "Mojito",
+      category: "Cocktail",
+      instructions: "Mix ingredients and serve over ice.",
+    },
+  })
   async findOne(@Param("id") id: string) {
     return this.cocktailsService.findOne(+id);
   }

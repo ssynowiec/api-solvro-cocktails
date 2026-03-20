@@ -1,3 +1,4 @@
+import { Allow, IsEnum, IsOptional, IsString } from "class-validator";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 import { PartialType } from "@nestjs/mapped-types";
@@ -18,6 +19,11 @@ enum Category {
 
 @Entity()
 export class Cocktail {
+  @ApiProperty({
+    example: 1,
+    description: "The unique identifier of the cocktail",
+  })
+  @Allow()
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -25,6 +31,7 @@ export class Cocktail {
     example: "Mojito",
     description: "The name of the cocktail",
   })
+  @IsString()
   @Column()
   name: string;
 
@@ -33,6 +40,7 @@ export class Cocktail {
     example: Category.Cocktail,
     enumName: "Category",
   })
+  @IsEnum(Category)
   @Column({
     type: "enum",
     enum: Category,
@@ -44,6 +52,8 @@ export class Cocktail {
     example: "Mix ingredients and serve over ice.",
     description: "The unique identifier of the cocktail",
   })
+  @IsString()
+  @IsOptional()
   @Column({ nullable: true })
   instructions?: string;
 }
