@@ -4,15 +4,32 @@ import { Injectable } from "@nestjs/common";
 
 import { database } from "../database";
 import {
-  CreateCocktailDto,
-  UpdateCocktailDto,
-  cocktails,
-} from "../db/schema/cocktails";
+  CreateCocktailsWithIngredients,
+  cocktailIngredients,
+} from "../db/schema/cocktail-ingredniet";
+import { UpdateCocktailDto, cocktails } from "../db/schema/cocktails";
 import { PaginationDto } from "../pagination/pagination.schema";
 
 @Injectable()
 export class CocktailsService {
-  create(createCocktailDto: CreateCocktailDto) {
+  async create(createCocktailDto: CreateCocktailsWithIngredients) {
+    const { ingredients, ...cocktailData } = createCocktailDto;
+
+    await database.transaction(async (tx) => {
+      const [cocktail] = await tx
+        .insert(cocktails)
+        .values(cocktailData)
+        .returning();
+
+      const cocktailIngredientsData = ingredients.map((ingredient) => ({
+        cocktailId: cocktail.id,
+        ingredientId: ingredient.id,
+        amount: ingredient.amount,
+      }));
+
+      await tx.insert(cocktailIngredients).values(cocktailIngredientsData);
+    });
+
     return database.insert(cocktails).values(createCocktailDto).returning();
   }
 

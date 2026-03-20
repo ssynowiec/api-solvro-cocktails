@@ -10,6 +10,7 @@ import {
   UsePipes,
 } from "@nestjs/common";
 import {
+  ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
@@ -17,11 +18,11 @@ import {
 } from "@nestjs/swagger";
 
 import { ZodValidationPipe } from "../common/pipes/zod.pipe";
-import type {
-  CreateCocktailDto,
-  UpdateCocktailDto,
-} from "../db/schema/cocktails";
-import { CocktailDto, cocktailInsertSchema } from "../db/schema/cocktails";
+import {
+  CreateCocktailsWithIngredients,
+  createCocktailsWithIngredientsSchema,
+} from "../db/schema/cocktail-ingredniet";
+import type { CocktailDto, UpdateCocktailDto } from "../db/schema/cocktails";
 import type { PaginationDto } from "../pagination/pagination.schema";
 import { paginationSchema } from "../pagination/pagination.schema";
 import { CocktailsService } from "./cocktails.service";
@@ -42,8 +43,14 @@ export class CocktailsController {
   constructor(private readonly cocktailsService: CocktailsService) {}
 
   @Post()
-  @UsePipes(new ZodValidationPipe(cocktailInsertSchema))
-  create(@Body() createCocktailDto: CreateCocktailDto) {
+  @ApiOperation({ summary: "Create a new cocktail with ingredients" })
+  @UsePipes(new ZodValidationPipe(createCocktailsWithIngredientsSchema))
+  @ApiBody({
+    required: false,
+    type: CreateCocktailsWithIngredients,
+  })
+  @ApiOkResponse({})
+  async create(@Body() createCocktailDto: CreateCocktailsWithIngredients) {
     return this.cocktailsService.create(createCocktailDto);
   }
 
@@ -81,7 +88,8 @@ export class CocktailsController {
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
+  @ApiOperation({ summary: "Get a cocktail by ID" })
+  async findOne(@Param("id") id: string) {
     return this.cocktailsService.findOne(+id);
   }
 
@@ -94,6 +102,7 @@ export class CocktailsController {
   }
 
   @Delete(":id")
+  @ApiOperation({ summary: "Delete a cocktail by ID" })
   remove(@Param("id") id: string) {
     return this.cocktailsService.remove(+id);
   }
