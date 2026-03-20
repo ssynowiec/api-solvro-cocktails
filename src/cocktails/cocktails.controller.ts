@@ -7,7 +7,6 @@ import {
   Patch,
   Post,
   Query,
-  UsePipes,
 } from "@nestjs/common";
 import {
   ApiBody,
@@ -17,24 +16,13 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 
-import { ZodValidationPipe } from "../common/pipes/zod.pipe";
-import {
-  CreateCocktailsWithIngredients,
-  createCocktailsWithIngredientsSchema,
-} from "../db/schema/cocktail-ingredniet";
-import type { CocktailDto, UpdateCocktailDto } from "../db/schema/cocktails";
-import type { PaginationDto } from "../pagination/pagination.schema";
-import { paginationSchema } from "../pagination/pagination.schema";
+import { PaginationDto } from "../pagination/entities/pagination.dto";
 import { CocktailsService } from "./cocktails.service";
+import { Cocktail, UpdateCocktailDto } from "./entities/cocktail.entity";
 
 class PaginatedCocktails {
-  data: CocktailDto[];
-  meta: {
-    page: number;
-    limit: number;
-    total: number;
-    pageCount: number;
-  };
+  data: Cocktail[];
+  meta: PaginationDto;
 }
 
 @ApiTags("cocktails")
@@ -44,13 +32,31 @@ export class CocktailsController {
 
   @Post()
   @ApiOperation({ summary: "Create a new cocktail with ingredients" })
-  @UsePipes(new ZodValidationPipe(createCocktailsWithIngredientsSchema))
   @ApiBody({
     required: false,
-    type: CreateCocktailsWithIngredients,
+    type: Cocktail,
+    examples: {
+      cocktail: {
+        value: {
+          name: "Mojito",
+          category: "Cocktail",
+          instructions: "Mix ingredients and serve over ice.",
+        },
+        summary: "Example cocktail creation payload",
+      },
+    },
+    description: "The cocktail to create",
   })
-  @ApiOkResponse({})
-  async create(@Body() createCocktailDto: CreateCocktailsWithIngredients) {
+  @ApiOkResponse({
+    type: Cocktail,
+    example: {
+      id: 1,
+      name: "Mojito",
+      category: "Cocktail",
+      instructions: "Mix ingredients and serve over ice.",
+    },
+  })
+  async create(@Body() createCocktailDto: Cocktail) {
     return this.cocktailsService.create(createCocktailDto);
   }
 
@@ -69,7 +75,6 @@ export class CocktailsController {
     example: 10,
     default: 10,
   })
-  @UsePipes(new ZodValidationPipe(paginationSchema))
   @ApiOperation({ summary: "Get all cocktails with pagination" })
   @ApiOkResponse({
     type: PaginatedCocktails,
@@ -94,7 +99,8 @@ export class CocktailsController {
   }
 
   @Patch(":id")
-  update(
+  @ApiOperation({ summary: "Update a cocktail by ID" })
+  async update(
     @Param("id") id: string,
     @Body() updateCocktailDto: UpdateCocktailDto,
   ) {
@@ -103,7 +109,7 @@ export class CocktailsController {
 
   @Delete(":id")
   @ApiOperation({ summary: "Delete a cocktail by ID" })
-  remove(@Param("id") id: string) {
+  async remove(@Param("id") id: string) {
     return this.cocktailsService.remove(+id);
   }
 }

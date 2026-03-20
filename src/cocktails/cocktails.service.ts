@@ -1,81 +1,54 @@
-import { eq } from "drizzle-orm";
+import { Repository } from "typeorm";
 
 import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
 
-import { database } from "../database";
-import {
-  CreateCocktailsWithIngredients,
-  cocktailIngredients,
-} from "../db/schema/cocktail-ingredniet";
-import { UpdateCocktailDto, cocktails } from "../db/schema/cocktails";
-import { PaginationDto } from "../pagination/pagination.schema";
+import { PaginationDto } from "../pagination/entities/pagination.dto";
+import { Cocktail, UpdateCocktailDto } from "./entities/cocktail.entity";
 
 @Injectable()
 export class CocktailsService {
-  async create(createCocktailDto: CreateCocktailsWithIngredients) {
-    const { ingredients, ...cocktailData } = createCocktailDto;
+  constructor(
+    @InjectRepository(Cocktail)
+    private cocktailRepository: Repository<Cocktail>,
+  ) {}
 
-    await database.transaction(async (tx) => {
-      const [cocktail] = await tx
-        .insert(cocktails)
-        .values(cocktailData)
-        .returning();
+  async create(createCocktailDto: Cocktail) {
+    const entity = this.cocktailRepository.create(createCocktailDto);
 
-      const cocktailIngredientsData = ingredients.map((ingredient) => ({
-        cocktailId: cocktail.id,
-        ingredientId: ingredient.id,
-        amount: ingredient.amount,
-      }));
-
-      await tx.insert(cocktailIngredients).values(cocktailIngredientsData);
-    });
-
-    return database.insert(cocktails).values(createCocktailDto).returning();
+    return this.cocktailRepository.save(entity);
   }
 
   async findAll(query: PaginationDto) {
     const { page, limit } = query;
-    const offset = (page - 1) * limit;
-    const data = await database
-      .select()
-      .from(cocktails)
-      .limit(limit)
-      .offset(offset);
+    const skip = (page - 1) * limit;
 
-    const total = await database.$count(cocktails);
+    const [data, total] = await this.cocktailRepository.findAndCount({
+      skip,
+      take: limit,
+    });
 
     return {
       data,
-      meta: { limit, page, total, pageCount: Math.ceil(total / limit) },
+      meta: {
+        total,
+        page,
+        limit,
+        lastPage: Math.ceil(total / limit),
+      },
     };
   }
 
   async findOne(id: number) {
-    return await database.query.cocktails.findMany({
-      with: {
-        ingredients: {
-          columns: {
-            cocktailId: false,
-            ingredientId: false,
-          },
-          with: {
-            ingredient: true,
-          },
-        },
-      },
-      where: eq(cocktails.id, id),
-    });
+    return this.cocktailRepository.findOneBy({ id });
   }
 
-  update(id: number, updateCocktailDto: UpdateCocktailDto) {
-    return database
-      .update(cocktails)
-      .set(updateCocktailDto)
-      .where(eq(cocktails.id, id))
-      .returning();
+  async update(id: number, updateCocktailDto: UpdateCocktailDto) {
+    await this.cocktailRepository.update(id, updateCocktailDto);
+    return this.cocktailRepository.findOneBy({ id });
   }
 
-  remove(id: number) {
-    return database.delete(cocktails).where(eq(cocktails.id, id)).returning();
+  async remove(id: number) {
+    return this.cocktailRepository.delete(id);
   }
 }

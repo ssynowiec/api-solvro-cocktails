@@ -1,43 +1,53 @@
-import { eq } from "drizzle-orm";
+import { Repository } from "typeorm";
 
 import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
 
-import { database } from "../database";
-import {
-  CreateIngredientDto,
-  UpdateIngredientDto,
-  ingredients,
-} from "../db/schema/ingredients";
+import { PaginationDto } from "../pagination/entities/pagination.dto";
+import { Ingredient, UpdateIngredientDto } from "./entities/ingredient.entity";
 
 @Injectable()
 export class IngredientsService {
-  create(createIngredientDto: CreateIngredientDto) {
-    return database.insert(ingredients).values(createIngredientDto).returning();
+  constructor(
+    @InjectRepository(Ingredient)
+    private ingredientRepository: Repository<Ingredient>,
+  ) {}
+
+  async create(createIngredientDto: Ingredient) {
+    const entity = this.ingredientRepository.create(createIngredientDto);
+    return this.ingredientRepository.save(entity);
   }
 
-  findAll() {
-    return database.select().from(ingredients);
+  async findAll(query: PaginationDto) {
+    const { page, limit } = query;
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await this.ingredientRepository.findAndCount({
+      skip,
+      take: limit,
+    });
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        lastPage: Math.ceil(total / limit),
+      },
+    };
   }
 
-  findOne(id: number) {
-    return database
-      .select()
-      .from(ingredients)
-      .where(eq(ingredients.id, id))
-      .limit(1);
+  async findOne(id: number) {
+    return this.ingredientRepository.findOneBy({ id });
   }
 
-  update(id: number, updateIngredientDto: UpdateIngredientDto) {
-    return database
-      .update(ingredients)
-      .set(updateIngredientDto)
-      .where(eq(ingredients.id, id));
+  async update(id: number, updateIngredientDto: UpdateIngredientDto) {
+    await this.ingredientRepository.update(id, updateIngredientDto);
+    return this.ingredientRepository.findOneBy({ id });
   }
 
-  remove(id: number) {
-    return database
-      .delete(ingredients)
-      .where(eq(ingredients.id, id))
-      .returning();
+  async remove(id: number) {
+    return this.ingredientRepository.delete(id);
   }
 }
